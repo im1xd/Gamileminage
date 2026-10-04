@@ -1,0 +1,26 @@
+{
+  "name": "gamil-minage-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gamil Minage — storefront and admin dashboard (Next.js, talks to the backend over HTTP only)",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test \"tests/*.test.ts\""
+  },
+  "dependencies": {
+    "next": "^15.5.7",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.2"
+  }
+}

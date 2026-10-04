@@ -1,0 +1,8 @@
+{
+  "name": "gamil-minage",
+  "private": true,
+  "description": "Gamil Minage — kitchenware store (frontend + backend monorepo)",
+  "scripts": {
+    "audit": "node scripts/audit.mjs"
+  }
+}

@@ -1,0 +1,25 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: { app: [backend, frontend] }
+    defaults:
+      run: { working-directory: ${{ matrix.app }} }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm test --if-present
+      - run: node ../scripts/audit.mjs
+      - run: npm run build
+        env:
+          # Dummy values: the build must succeed without real secrets (they are read lazily at request time).
+          BACKEND_URL: http://localhost:4000
+          NEXT_PUBLIC_SITE_URL: https://example.com
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: demo
