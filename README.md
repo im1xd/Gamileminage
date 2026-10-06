@@ -65,3 +65,7 @@ node scripts/audit.mjs                         # فحص أمني/جودة (جذ�
 cd backend  && npm run typecheck && npm test
 cd frontend && npm run typecheck && npm test
 ```
+
+## الهوية البصرية
+اللوغو والأيقونات في `frontend/public/brand/` (نسخة داكنة للخلفيات الفاتحة، ونسخة فاتحة للوحة التحكم، وأيقونة التطبيق وصورة المشاركة `og.png`).
+الألوان من اللوغو: كحلي `#08224a` وذهبي `#c09840` (متغيرات `--cobalt-deep` و`--gold` في `frontend/src/app/globals.css`).

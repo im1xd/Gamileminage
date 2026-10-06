@@ -11,9 +11,9 @@ export function SiteHeader({ settings, categories }: { settings: Settings; categ
       {settings.announcement && <div className="announce">{settings.announcement}</div>}
       <header className="site-header">
         <div className="container header-main">
-          <Link href="/" className="logo" aria-label={name}>
-            <span className="logo-mark" aria-hidden>G</span>
-            <span>{name}<small>أواني وأدوات منزلية</small></span>
+          <Link href="/" className="brand" aria-label={name}>
+            <img className="brand-mark" src="/brand/mark.webp" width={121} height={240} alt="" />
+            <img className="brand-word" src="/brand/wordmark.webp" width={440} height={177} alt={name} />
           </Link>
           <form className="search" action="/shop" role="search">
             <label className="sr-only" htmlFor="q">ابحث في المتجر</label>

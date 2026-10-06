@@ -16,7 +16,7 @@ export function SiteFooter({ settings, categories }: { settings: Settings; categ
         <div className="container">
           <div className="footer-grid">
             <div>
-              <h4>{name}</h4>
+              <img className="footer-logo" src="/brand/logo.webp" width={440} height={752} alt={name} loading="lazy" />
               <p style={{ maxWidth: '34ch', fontSize: '0.94rem' }}>{settings.tagline}</p>
               <div className="social">
                 {settings.instagram && <a href={settings.instagram} target="_blank" rel="noopener noreferrer" aria-label="إنستغرام"><InstagramIcon /></a>}

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { getHome } from '@/lib/api';
 import { Img } from '@/components/Img';
 import { ProductGrid } from '@/components/ProductCard';
-import { CashIcon, PotArt, ShieldIcon, TruckIcon, WhatsappIcon } from '@/components/icons';
+import { CashIcon, ShieldIcon, TruckIcon, WhatsappIcon } from '@/components/icons';
 import type { Banner, CategoryNode, ProductCardData } from '@/lib/types';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,7 +28,7 @@ function Hero({ banners, tagline, name }: { banners: Banner[]; tagline: string; 
               {b?.imagePublicId ? (
                 <Img id={b.imagePublicId} alt={b.title || name} width={360} ratio="4:5" sizes="(max-width: 760px) 60vw, 360px" priority={i === 0} />
               ) : (
-                <div className="arch-art"><PotArt /></div>
+                <div className="arch-art"><img className="arch-mark" src="/brand/mark.webp" width={121} height={240} alt="" /></div>
               )}
             </div>
           </div>

@@ -114,7 +114,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <div className="admin">
       {open && <div className="scrim" onClick={() => setOpen(false)} />}
       <aside className={`admin-side ${open ? 'open' : ''}`}>
-        <div className="admin-brand"><span className="logo-mark">G</span><span>Gamil Minage</span></div>
+        <div className="admin-brand"><img className="brand-mark" src="/brand/mark-light.webp" width={121} height={240} alt="" /><img className="brand-word" src="/brand/wordmark-light.webp" width={440} height={177} alt="Gamil Minage" /></div>
         <nav className="admin-nav" aria-label="لوحة التحكم">
           {NAV.map(({ href, label, icon: Icon, exact, badge }) => {
             const active = exact ? pathname === href : pathname.startsWith(href);

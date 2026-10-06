@@ -27,8 +27,8 @@ export default function LoginPage() {
   return (
     <div className="login-wrap">
       <form className="login-card stack" onSubmit={submit} style={{ ['--gap' as string]: '1rem' }}>
-        <div className="logo-mark" aria-hidden>G</div>
-        <h1 className="center" style={{ fontSize: '1.4rem' }}>لوحة تحكم Gamil Minage</h1>
+        <img className="login-logo" src="/brand/logo.webp" width={440} height={752} alt="Gamil Minage" />
+        <h1 className="center" style={{ fontSize: '1.25rem' }}>لوحة التحكم</h1>
         <div className="field"><label htmlFor="u">اسم المستخدم</label><input id="u" className="input" dir="ltr" autoComplete="username" autoCapitalize="none" value={username} onChange={(e) => setUsername(e.target.value)} required maxLength={40} /></div>
         <div className="field"><label htmlFor="p">كلمة المرور</label><input id="p" className="input" dir="ltr" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required maxLength={200} /></div>
         {error && <div className="notice bad" role="alert">{error}</div>}

@@ -13,12 +13,13 @@ export const metadata: Metadata = {
   title: { default: 'Gamil Minage — أواني وأدوات منزلية', template: '%s | Gamil Minage' },
   description: 'متجر Gamil Minage في وادي سوف: أواني مطبخ وأدوات منزلية وديكور، توصيل لجميع الولايات والدفع عند الاستلام.',
   applicationName: 'Gamil Minage',
-  openGraph: { type: 'website', locale: 'ar_DZ', siteName: 'Gamil Minage' },
+  openGraph: { type: 'website', locale: 'ar_DZ', siteName: 'Gamil Minage', images: [{ url: '/brand/og.png', width: 1200, height: 630, alt: 'Gamil Minage — Homeware & Kitchenware' }] },
+  twitter: { card: 'summary_large_image', images: ['/brand/og.png'] },
   verification: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION ? { google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION } : undefined,
   formatDetection: { telephone: false },
 };
 
-export const viewport: Viewport = { themeColor: '#12307f', width: 'device-width', initialScale: 1 };
+export const viewport: Viewport = { themeColor: '#08224a', width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
