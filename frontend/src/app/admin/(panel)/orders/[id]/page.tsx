@@ -14,7 +14,7 @@ import { ErrorBox, PageLoading, StatusPill, useApi } from '@/components/admin/ui
 interface Order {
   id: string; orderNumber: string; status: string; customerName: string; phone: string; wilayaCode: number; wilayaName: string; commune: string; address: string;
   customerNote: string; adminNote: string; subtotal: number; shippingFee: number; shippingPending: boolean; total: number; createdAt: string;
-  items: { id: string; productName: string; imagePublicId: string | null; unitPrice: number; quantity: number; lineTotal: number }[];
+  items: { id: string; productName: string; variantLabel: string; imagePublicId: string | null; unitPrice: number; quantity: number; lineTotal: number }[];
   history: { id: string; status: string; note: string; createdAt: string; adminName: string | null }[];
 }
 
@@ -72,7 +72,7 @@ export default function OrderDetailPage() {
             <div className="table-wrap"><table className="t"><thead><tr><th>المنتج</th><th>السعر</th><th>الكمية</th><th>المجموع</th></tr></thead><tbody>
               {o.items.map((i) => (
                 <tr key={i.id}>
-                  <td><div className="row"><div className="thumb-s">{i.imagePublicId ? <img src={cld(i.imagePublicId, { width: 46, ratio: '1:1' })} alt="" width={46} height={46} /> : <div className="noimg"><BoxIcon /></div>}</div>{i.productName}</div></td>
+                  <td><div className="row"><div className="thumb-s">{i.imagePublicId ? <img src={cld(i.imagePublicId, { width: 46, ratio: '1:1' })} alt="" width={46} height={46} /> : <div className="noimg"><BoxIcon /></div>}</div><div>{i.productName}{i.variantLabel && <><br /><small className="muted">{i.variantLabel}</small></>}</div></div></td>
                   <td className="num">{formatNumber(i.unitPrice)}</td><td className="num">{i.quantity}</td><td className="num">{formatNumber(i.lineTotal)}</td>
                 </tr>
               ))}</tbody></table></div>

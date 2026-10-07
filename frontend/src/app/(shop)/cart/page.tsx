@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCart } from '@/lib/cart';
+import { cartKey, useCart } from '@/lib/cart';
 import { formatNumber } from '@/lib/format';
 import { Img } from '@/components/Img';
 import { BoxIcon, TrashIcon } from '@/components/icons';
@@ -21,18 +21,19 @@ export default function CartPage() {
         <div className="cart-layout">
           <div className="panel">
             {cart.items.map((item) => (
-              <div className="cart-line" key={item.productId}>
+              <div className="cart-line" key={cartKey(item)}>
                 <Link href={`/product/${encodeURIComponent(item.slug)}`}>
                   {item.image ? <Img id={item.image} alt={item.name} width={84} ratio="1:1" /> : <div className="noimg"><BoxIcon /></div>}
                 </Link>
                 <div>
                   <h3><Link href={`/product/${encodeURIComponent(item.slug)}`}>{item.name}</Link></h3>
+                  {item.variantLabel && <p className="muted" style={{ fontSize: '.85rem', marginBlockEnd: '.4rem' }}>{item.variantLabel}</p>}
                   <div className="qty" role="group" aria-label="الكمية" style={{ height: 38 }}>
-                    <button type="button" aria-label="أنقص" onClick={() => cart.setQty(item.productId, item.quantity - 1)} disabled={item.quantity <= 1}>−</button>
+                    <button type="button" aria-label="أنقص" onClick={() => cart.setQty(cartKey(item), item.quantity - 1)} disabled={item.quantity <= 1}>−</button>
                     <output>{item.quantity}</output>
-                    <button type="button" aria-label="زِد" onClick={() => cart.setQty(item.productId, item.quantity + 1)} disabled={item.quantity >= item.maxQty}>+</button>
+                    <button type="button" aria-label="زِد" onClick={() => cart.setQty(cartKey(item), item.quantity + 1)} disabled={item.quantity >= item.maxQty}>+</button>
                   </div>
-                  <div><button type="button" className="link-btn" onClick={() => cart.remove(item.productId)}><TrashIcon width={14} height={14} style={{ display: 'inline', verticalAlign: '-2px' }} /> حذف</button></div>
+                  <div><button type="button" className="link-btn" onClick={() => cart.remove(cartKey(item))}><TrashIcon width={14} height={14} style={{ display: 'inline', verticalAlign: '-2px' }} /> حذف</button></div>
                 </div>
                 <b className="price"><span className="num">{formatNumber(item.price * item.quantity)}</span> دج</b>
               </div>

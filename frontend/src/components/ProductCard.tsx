@@ -27,10 +27,16 @@ export function ProductCard({ p, priority = false }: { p: ProductCardData; prior
         {p.categoryName && <span className="card-cat">{p.categoryName}</span>}
         <h3 className="card-title"><Link href={`/product/${encodeURIComponent(p.slug)}`}>{p.name}</Link></h3>
         <div className="price-row">
-          <span className="price"><span className="num">{formatNumber(p.price)}</span> دج</span>
+          <span className="price">{p.priceFrom && <small className="from">من </small>}<span className="num">{formatNumber(p.price)}</span> دج</span>
           {p.compareAtPrice && p.compareAtPrice > p.price && <span className="price-old"><span className="num">{formatNumber(p.compareAtPrice)}</span></span>}
         </div>
-        <AddToCartButton compact product={{ id: p.id, slug: p.slug, name: p.name, price: p.price, image: first ?? null, maxQty: 20, inStock: p.inStock }} />
+        {p.hasOptions ? (
+          <Link className={`btn btn-soft btn-sm btn-block card-add ${p.inStock ? '' : 'disabled'}`} aria-disabled={!p.inStock} href={`/product/${encodeURIComponent(p.slug)}`}>
+            {p.inStock ? 'اختر اللون / الحجم' : 'نفدت الكمية'}
+          </Link>
+        ) : (
+          <AddToCartButton compact product={{ id: p.id, slug: p.slug, name: p.name, price: p.price, image: first ?? null, maxQty: 20, inStock: p.inStock }} />
+        )}
       </div>
     </article>
   );

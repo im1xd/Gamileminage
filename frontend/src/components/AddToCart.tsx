@@ -7,6 +7,9 @@ import { CartIcon } from './icons';
 
 export interface Buyable {
   id: string;
+  /** Option (colour/size) id, or null for plain products. */
+  variantId?: string | null;
+  variantLabel?: string;
   slug: string;
   name: string;
   price: number;
@@ -25,7 +28,7 @@ export function AddToCartButton({ product, quantity = 1, compact = false, label 
       type="button"
       className={`btn btn-block ${compact ? 'btn-soft btn-sm card-add' : ''}`}
       onClick={() => {
-        cart.add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: product.image, quantity, maxQty: product.maxQty });
+        cart.add({ productId: product.id, variantId: product.variantId ?? null, variantLabel: product.variantLabel ?? '', slug: product.slug, name: product.name, price: product.price, image: product.image, quantity, maxQty: product.maxQty });
         toast('تمت الإضافة إلى السلة ✓');
       }}
     >
@@ -43,7 +46,7 @@ export function BuyNowButton({ product, quantity }: { product: Buyable; quantity
       className="btn btn-brass btn-block"
       disabled={!product.inStock}
       onClick={() => {
-        cart.add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: product.image, quantity, maxQty: product.maxQty });
+        cart.add({ productId: product.id, variantId: product.variantId ?? null, variantLabel: product.variantLabel ?? '', slug: product.slug, name: product.name, price: product.price, image: product.image, quantity, maxQty: product.maxQty });
         router.push('/checkout');
       }}
     >

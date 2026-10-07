@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getHome } from '@/lib/api';
 import { Img } from '@/components/Img';
+import { CategoryArt } from '@/components/CategoryArt';
 import { ProductGrid } from '@/components/ProductCard';
 import { CashIcon, ShieldIcon, TruckIcon, WhatsappIcon } from '@/components/icons';
 import type { Banner, CategoryNode, ProductCardData } from '@/lib/types';
@@ -64,7 +65,11 @@ function Categories({ items }: { items: CategoryNode[] }) {
         {items.map((c) => (
           <Link key={c.id} href={`/category/${encodeURIComponent(c.slug)}`} className="cat-tile">
             <div className="cat-arch">
-              {c.imagePublicId ? <Img id={c.imagePublicId} alt={c.name} width={200} ratio="4:5" sizes="(max-width: 560px) 44vw, 200px" /> : <span className="glyph">{c.name.slice(0, 1)}</span>}
+              {c.imagePublicId ?? c.coverImage ? (
+                <Img id={(c.imagePublicId ?? c.coverImage) as string} alt={c.name} width={200} ratio="4:5" sizes="(max-width: 560px) 44vw, 200px" />
+              ) : (
+                <CategoryArt slug={c.slug} name={c.name} />
+              )}
             </div>
             <b>{c.name}</b>
             <span><span className="num">{c.productCount}</span> منتج</span>

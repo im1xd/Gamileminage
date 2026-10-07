@@ -28,7 +28,7 @@ for (const f of all.filter((f) => /\/app\/api\/.*route\.ts$/.test(f))) {
 }
 
 // 2. SQL must be parametrised: only fixed identifiers may be interpolated inside query text.
-const SAFE_INTERPOLATIONS = new Set(['whereSql', 'cte', 'order', 'limitPh', 'offsetPh', 'ph', 'table', 'COLUMNS', 'CARD_COLUMNS', 'TZ', 'COLUMNS.replace']);
+const SAFE_INTERPOLATIONS = new Set(['whereSql', 'cte', 'order', 'limitPh', 'offsetPh', 'ph', 'table', 'COLUMNS', 'CARD_COLUMNS', 'TZ', 'COLUMNS.replace', 'VX', 'EFF_PRICE', 'EFF_STOCK', 'COVER']);
 for (const f of src.filter((f) => /\/backend\//.test(f))) {
   const code = read(f);
   for (const m of code.matchAll(/(?:query|t\.query|runner\.query)(?:<[^>]*>)?\(\s*`([^`]*)`/gs)) {

@@ -6,7 +6,7 @@ import { STATUS_LABEL, STATUS_TONE, formatDate, formatNumber } from '@/lib/forma
 
 interface Tracked {
   orderNumber: string; status: string; subtotal: number; shippingFee: number; shippingPending: boolean; total: number; wilayaName: string; createdAt: string;
-  items: { productName: string; quantity: number; unitPrice: number }[];
+  items: { productName: string; variantLabel: string; quantity: number; unitPrice: number }[];
   history: { status: string; createdAt: string }[];
 }
 
@@ -46,7 +46,7 @@ export default function TrackPage() {
           </div>
           <p className="muted" style={{ marginBlock: '.4rem 1rem' }}>{order.wilayaName} • {formatDate(order.createdAt)}</p>
           {order.items.map((i, idx) => (
-            <div className="summary-row" key={idx}><span>{i.productName} <span className="muted">× <span className="num">{i.quantity}</span></span></span><span className="num">{formatNumber(i.unitPrice * i.quantity)}</span></div>
+            <div className="summary-row" key={idx}><span>{i.productName}{i.variantLabel && <small className="muted"> ({i.variantLabel})</small>} <span className="muted">× <span className="num">{i.quantity}</span></span></span><span className="num">{formatNumber(i.unitPrice * i.quantity)}</span></div>
           ))}
           <div className="summary-row"><span>التوصيل</span><span>{order.shippingPending ? 'سيُؤكَّد' : <><span className="num">{formatNumber(order.shippingFee)}</span> دج</>}</span></div>
           <div className="summary-row total"><span>الإجمالي</span><span><span className="num">{formatNumber(order.total)}</span> دج</span></div>

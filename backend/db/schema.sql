@@ -65,6 +65,26 @@ CREATE TABLE IF NOT EXISTS product_images (
 );
 CREATE INDEX IF NOT EXISTS product_images_product_idx ON product_images (product_id, sort_order);
 
+-- Colour / size options. A product WITHOUT rows here is sold as a single item (price + stock on the product itself).
+-- A product WITH active rows is sold per option: each row has its own stock and optional price override.
+CREATE TABLE IF NOT EXISTS product_variants (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id      uuid        NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  size            text        NOT NULL DEFAULT '',
+  color           text        NOT NULL DEFAULT '',
+  color_hex       text        NOT NULL DEFAULT '',
+  sku             text        NOT NULL DEFAULT '',
+  price           integer     CHECK (price IS NULL OR price >= 0),
+  stock           integer     NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  image_public_id text,
+  sort_order      integer     NOT NULL DEFAULT 0,
+  is_active       boolean     NOT NULL DEFAULT true,
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT variants_has_label CHECK (size <> '' OR color <> '')
+);
+CREATE UNIQUE INDEX IF NOT EXISTS variants_unique ON product_variants (product_id, lower(size), lower(color));
+CREATE INDEX IF NOT EXISTS variants_product_idx ON product_variants (product_id, sort_order);
+
 CREATE TABLE IF NOT EXISTS banners (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title           text        NOT NULL DEFAULT '',
@@ -125,6 +145,8 @@ CREATE TABLE IF NOT EXISTS order_items (
   line_total      integer GENERATED ALWAYS AS (unit_price * quantity) STORED
 );
 CREATE INDEX IF NOT EXISTS order_items_order_idx ON order_items (order_id);
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant_id    uuid REFERENCES product_variants(id) ON DELETE SET NULL;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant_label text NOT NULL DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS order_status_history (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),

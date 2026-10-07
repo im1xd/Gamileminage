@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState, type FormEvent, type InputHTMLAttributes } from 'react';
-import { useCart } from '@/lib/cart';
+import { cartKey, useCart } from '@/lib/cart';
 import { api, errorMessage, ApiClientError } from '@/lib/client-api';
 import { formatNumber } from '@/lib/format';
 import { toast } from '@/lib/toast';
@@ -60,7 +60,7 @@ export default function CheckoutPage() {
           address: form.address,
           note: form.note,
           website: form.website,
-          items: cart.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+          items: cart.items.map((i) => ({ productId: i.productId, variantId: i.variantId, quantity: i.quantity })),
         },
       });
       cart.clear();
@@ -126,11 +126,11 @@ export default function CheckoutPage() {
         <aside className="panel" style={{ position: 'sticky', insetBlockStart: 130 }}>
           <h2>ملخص الطلب</h2>
           {cart.items.map((i) => (
-            <div key={i.productId} className="row" style={{ paddingBlock: '.4rem' }}>
+            <div key={cartKey(i)} className="row" style={{ paddingBlock: '.4rem' }}>
               <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', flex: 'none', border: '1px solid var(--line)' }}>
                 {i.image ? <Img id={i.image} alt="" width={48} ratio="1:1" /> : <div className="noimg"><BoxIcon /></div>}
               </div>
-              <span className="grow" style={{ fontSize: '.92rem' }}>{i.name} <span className="muted">× <span className="num">{i.quantity}</span></span></span>
+              <span className="grow" style={{ fontSize: '.92rem' }}>{i.name}{i.variantLabel && <small className="muted" style={{ display: 'block' }}>{i.variantLabel}</small>} <span className="muted">× <span className="num">{i.quantity}</span></span></span>
               <b className="num" style={{ fontSize: '.92rem' }}>{formatNumber(i.price * i.quantity)}</b>
             </div>
           ))}

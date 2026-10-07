@@ -39,6 +39,27 @@ export const changePasswordSchema = z
   })
   .refine((v) => v.currentPassword !== v.newPassword, { message: 'كلمة المرور الجديدة يجب أن تختلف عن الحالية', path: ['newPassword'] });
 
+export const variantSchema = z
+  .object({
+    id: id.optional(),
+    size: optionalText(40, 'الحجم'),
+    color: optionalText(40, 'اللون'),
+    colorHex: z
+      .string()
+      .transform(clean)
+      .pipe(z.string().regex(/^(#[0-9a-fA-F]{6})?$/, 'لون غير صالح'))
+      .optional()
+      .default(''),
+    sku: optionalText(60, 'رمز الخيار'),
+    price: money('سعر الخيار').nullable().optional().default(null),
+    stock: z.number({ invalid_type_error: 'الكمية غير صالحة' }).int('الكمية يجب أن تكون عددًا صحيحًا').min(0, 'الكمية لا يمكن أن تكون سالبة').max(1_000_000).default(0),
+    imagePublicId: publicId.nullable().optional().default(null),
+    isActive: z.boolean().default(true),
+  })
+  .refine((v) => v.size !== '' || v.color !== '', { message: 'اكتب اللون أو الحجم لكل خيار', path: ['color'] });
+
+export const variantKey = (v: { size: string; color: string }) => `${v.size.toLowerCase()}|${v.color.toLowerCase()}`;
+
 export const productSchema = z
   .object({
     name: text(2, 160, 'اسم المنتج'),
@@ -56,10 +77,15 @@ export const productSchema = z
       .array(z.object({ publicId, alt: optionalText(160, 'وصف الصورة') }))
       .max(12, 'الحد الأقصى 12 صورة')
       .default([]),
+    variants: z.array(variantSchema).max(60, 'الحد الأقصى 60 خيارًا').default([]),
   })
   .refine((v) => v.compareAtPrice === null || v.compareAtPrice > v.price, {
     message: 'السعر قبل التخفيض يجب أن يكون أكبر من السعر الحالي',
     path: ['compareAtPrice'],
+  })
+  .refine((v) => new Set(v.variants.map(variantKey)).size === v.variants.length, {
+    message: 'يوجد خياران متطابقان (نفس اللون ونفس الحجم)',
+    path: ['variants'],
   });
 
 export const categorySchema = z.object({
@@ -148,7 +174,7 @@ export const orderCreateSchema = z.object({
   address: optionalText(200, 'العنوان'),
   note: optionalText(300, 'الملاحظة'),
   items: z
-    .array(z.object({ productId: id, quantity: z.number().int().min(1, 'الكمية غير صالحة').max(20, 'الحد الأقصى 20 قطعة لكل منتج') }))
+    .array(z.object({ productId: id, variantId: id.nullable().optional().default(null), quantity: z.number().int().min(1, 'الكمية غير صالحة').max(20, 'الحد الأقصى 20 قطعة لكل منتج') }))
     .min(1, 'السلة فارغة')
     .max(30, 'عدد المنتجات كبير'),
   // Honeypot: real visitors never see or fill this field; bots usually do.
@@ -205,6 +231,7 @@ export const uploadSignSchema = z.object({ folder: z.enum(['products', 'categori
 export const idParam = id;
 
 export type ProductInput = z.infer<typeof productSchema>;
+export type VariantInput = z.infer<typeof variantSchema>;
 export type CategoryInput = z.infer<typeof categorySchema>;
 export type BannerInput = z.infer<typeof bannerSchema>;
 export type OrderCreateInput = z.infer<typeof orderCreateSchema>;

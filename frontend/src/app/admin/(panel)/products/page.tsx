@@ -9,7 +9,7 @@ import { toast } from '@/lib/toast';
 import { BoxIcon, EditIcon, PlusIcon } from '@/components/icons';
 import { ConfirmButton, ErrorBox, PageLoading, Pagination, Switch, useApi, useDebounced } from '@/components/admin/ui';
 
-interface Product { id: string; name: string; slug: string; sku: string; price: number; compareAtPrice: number | null; stock: number; trackStock: boolean; isActive: boolean; isFeatured: boolean; soldCount: number; categoryName: string | null; image: string | null }
+interface Product { id: string; name: string; slug: string; sku: string; variantsCount: number; price: number; compareAtPrice: number | null; stock: number; trackStock: boolean; isActive: boolean; isFeatured: boolean; soldCount: number; categoryName: string | null; image: string | null }
 interface Res { items: Product[]; total: number; page: number; pages: number }
 interface Cat { id: string; name: string; parentId: string | null }
 
@@ -71,8 +71,8 @@ export default function ProductsPage() {
                 <td><div className="row"><div className="thumb-s">{p.image ? <img src={cld(p.image, { width: 46, ratio: '1:1' })} alt="" width={46} height={46} loading="lazy" /> : <div className="noimg"><BoxIcon /></div>}</div>
                   <div><b>{p.name}</b>{p.sku && <><br /><small className="muted num">{p.sku}</small></>}</div></div></td>
                 <td>{p.categoryName ?? <span className="muted">—</span>}</td>
-                <td><span className="num">{formatNumber(p.price)}</span> دج{p.compareAtPrice && <><br /><small className="muted" style={{ textDecoration: 'line-through' }}><span className="num">{formatNumber(p.compareAtPrice)}</span></small></>}</td>
-                <td>{p.trackStock ? <span className={`pill ${p.stock === 0 ? 'pill-bad' : p.stock <= 5 ? 'pill-warn' : 'pill-ok'}`}><span className="num">{p.stock}</span></span> : <span className="muted">غير محدود</span>}</td>
+                <td>{p.variantsCount > 0 && <small className="muted">من </small>}<span className="num">{formatNumber(p.price)}</span> دج{p.compareAtPrice && <><br /><small className="muted" style={{ textDecoration: 'line-through' }}><span className="num">{formatNumber(p.compareAtPrice)}</span></small></>}</td>
+                <td>{p.trackStock ? <span className={`pill ${p.stock === 0 ? 'pill-bad' : p.stock <= 5 ? 'pill-warn' : 'pill-ok'}`}><span className="num">{p.stock}</span></span> : <span className="muted">غير محدود</span>}{p.variantsCount > 0 && <><br /><small className="muted"><span className="num">{p.variantsCount}</span> خيار</small></>}</td>
                 <td><Switch checked={p.isActive} label="إظهار المنتج" onChange={(v) => void flag(p, { isActive: v })} /></td>
                 <td><Switch checked={p.isFeatured} label="منتج مميز" onChange={(v) => void flag(p, { isFeatured: v })} /></td>
                 <td><div className="row" style={{ justifyContent: 'flex-end' }}>

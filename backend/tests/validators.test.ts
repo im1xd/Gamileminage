@@ -110,3 +110,33 @@ test('order status machine', () => {
   assert.equal(canTransition('returned', 'delivered'), false);
   assert.ok(canTransition('cancelled', 'cancelled'));
 });
+
+test('variants: need a colour or size, unique, valid hex, sane numbers', () => {
+  const base = { name: 'موكا', price: 3000, stock: 0, images: [] };
+  const v = (patch: object) => ({ color: 'أخضر', size: '6 أكواب', stock: 3, ...patch });
+  const ok = (variants: object[]) => productSchema.safeParse({ ...base, variants }).success;
+  assert.ok(ok([v({})]));
+  assert.ok(ok([v({ colorHex: '#1f5f4a', price: 2500 })]));
+  assert.ok(ok([v({ size: '' }), v({ color: 'بنفسجي', size: '' })]), 'colour-only options');
+  assert.equal(ok([v({ color: '', size: '' })]), false, 'label required');
+  assert.equal(ok([v({}), v({})]), false, 'duplicates');
+  assert.equal(ok([v({}), v({ color: 'أخضر', size: '6 أكواب' })]), false, 'duplicates ignoring case');
+  assert.equal(ok([v({ colorHex: 'red' })]), false, 'hex must be #rrggbb');
+  assert.equal(ok([v({ colorHex: 'url(javascript:1)' })]), false);
+  assert.equal(ok([v({ stock: -1 })]), false);
+  assert.equal(ok([v({ stock: 1.5 })]), false);
+  assert.equal(ok([v({ price: -5 })]), false);
+  assert.equal(ok([v({ imagePublicId: 'https://evil.example/x.png' })]), false);
+  assert.equal(ok([v({ id: "1' OR 1=1" })]), false);
+  assert.equal(ok(Array.from({ length: 61 }, (_, i) => v({ size: `s${i}` }))), false, 'max 60');
+  assert.equal(productSchema.safeParse({ ...base }).success, true, 'variants optional');
+});
+
+test('order items: option id is optional but must be a uuid', () => {
+  const item = (variantId: unknown) => orderCreateSchema.safeParse({ ...validOrder, items: [{ productId: UUID, variantId, quantity: 1 }] }).success;
+  assert.ok(item(UUID));
+  assert.ok(item(null));
+  assert.ok(item(undefined));
+  assert.equal(item('nope'), false);
+  assert.equal(item("x'; DROP TABLE orders;--"), false);
+});

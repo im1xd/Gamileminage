@@ -7,6 +7,8 @@ export interface CategoryNode {
   slug: string;
   description: string;
   imagePublicId: string | null;
+  /** Own photo, else the photo of its best-selling product (computed by the backend). */
+  coverImage: string | null;
   productCount: number;
   children?: CategoryNode[];
 }
@@ -16,6 +18,10 @@ export interface ProductCardData {
   name: string;
   slug: string;
   price: number;
+  /** true when options (colours/sizes) have different prices → show "from". */
+  priceFrom: boolean;
+  /** true when the buyer must pick a colour/size first. */
+  hasOptions: boolean;
   compareAtPrice: number | null;
   isFeatured: boolean;
   inStock: boolean;
@@ -25,7 +31,21 @@ export interface ProductCardData {
   images: string[];
 }
 
-export interface ProductDetail extends Omit<ProductCardData, 'images'> {
+export interface Variant {
+  id: string;
+  size: string;
+  color: string;
+  colorHex: string;
+  /** null → same price as the product. */
+  price: number | null;
+  imagePublicId: string | null;
+  inStock: boolean;
+  lowStock: boolean;
+  maxQty: number;
+}
+
+export interface ProductDetail extends Omit<ProductCardData, 'images' | 'priceFrom' | 'hasOptions'> {
+  variants: Variant[];
   description: string;
   brand: string;
   sku: string;

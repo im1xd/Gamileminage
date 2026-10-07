@@ -7,6 +7,7 @@ import type { CategoryInput } from '../validators';
 import { uniqueSlug } from './shared';
 
 interface CatRow {
+  cover_image?: string | null;
   id: string;
   parent_id: string | null;
   name: string;
@@ -18,18 +19,26 @@ interface CatRow {
   product_count: number;
 }
 
+/** Cover for a category tile: its own photo, else the photo of its best-selling product (or of a sub-category's). */
+const COVER = `COALESCE(c.image_public_id,
+    (SELECT pi.public_id FROM product_images pi JOIN products p ON p.id = pi.product_id
+      WHERE p.is_active = true
+        AND (p.category_id = c.id OR p.category_id IN (SELECT ch.id FROM categories ch WHERE ch.parent_id = c.id AND ch.is_active = true))
+      ORDER BY p.sold_count DESC, p.created_at DESC, pi.sort_order LIMIT 1)) AS cover_image`;
+
 const COLUMNS = `c.id, c.parent_id, c.name, c.slug, c.description, c.image_public_id, c.sort_order, c.is_active,
   (SELECT COUNT(*)::int FROM products p WHERE p.category_id = c.id AND p.is_active = true) AS product_count`;
 
 /** Active categories as a two-level tree; a parent's count includes its children. */
 export async function listPublicCategories() {
-  const rows = await query<CatRow>(`SELECT ${COLUMNS} FROM categories c WHERE c.is_active = true ORDER BY c.sort_order, c.name`);
+  const rows = await query<CatRow>(`SELECT ${COLUMNS}, ${COVER} FROM categories c WHERE c.is_active = true ORDER BY c.sort_order, c.name`);
   const roots = rows.filter((r) => r.parent_id === null);
   const tree = roots.map((root) => {
     const children = rows.filter((r) => r.parent_id === root.id);
     return {
       ...root,
       product_count: root.product_count + children.reduce((sum, c) => sum + c.product_count, 0),
+      cover_image: root.cover_image ?? children.find((c) => c.cover_image)?.cover_image ?? null,
       children,
     };
   });

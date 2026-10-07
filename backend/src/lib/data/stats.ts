@@ -35,10 +35,19 @@ export async function dashboardStats() {
     ),
     query(`SELECT status, COUNT(*)::int AS n FROM orders GROUP BY status`),
     query(
-      `SELECT p.id, p.name, p.stock,
-              (SELECT pi.public_id FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order, pi.created_at LIMIT 1) AS image
-       FROM products p WHERE p.is_active = true AND p.track_stock = true AND p.stock <= 5
-       ORDER BY p.stock, p.name LIMIT 8`,
+      `SELECT * FROM (
+         SELECT p.id, p.name, p.stock,
+                (SELECT pi.public_id FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order, pi.created_at LIMIT 1) AS image
+         FROM products p
+         WHERE p.is_active = true AND p.track_stock = true AND p.stock <= 5
+           AND NOT EXISTS (SELECT 1 FROM product_variants x WHERE x.product_id = p.id AND x.is_active = true)
+         UNION ALL
+         SELECT p.id, p.name || ' — ' || concat_ws(' / ', NULLIF(v.color, ''), NULLIF(v.size, '')) AS name, v.stock,
+                COALESCE(v.image_public_id, (SELECT pi.public_id FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order, pi.created_at LIMIT 1)) AS image
+         FROM product_variants v JOIN products p ON p.id = v.product_id
+         WHERE p.is_active = true AND p.track_stock = true AND v.is_active = true AND v.stock <= 5
+       ) low
+       ORDER BY stock, name LIMIT 8`,
     ),
     query(
       `SELECT id, order_number, status, customer_name, wilaya_name, total, created_at
