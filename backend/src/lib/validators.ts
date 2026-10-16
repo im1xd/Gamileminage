@@ -181,6 +181,10 @@ export const orderCreateSchema = z.object({
   website: z.string().max(200).optional(),
 });
 
+export const cartCheckSchema = z.object({
+  items: z.array(z.object({ productId: id, variantId: id.nullable().optional().default(null) })).min(1).max(30),
+});
+
 export const orderTrackSchema = z.object({
   number: text(4, 20, 'رقم الطلب'),
   phone: z.string().transform((v, ctx) => {

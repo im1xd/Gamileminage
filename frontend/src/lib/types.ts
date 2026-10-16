@@ -22,6 +22,8 @@ export interface ProductCardData {
   priceFrom: boolean;
   /** true when the buyer must pick a colour/size first. */
   hasOptions: boolean;
+  hasColors: boolean;
+  hasSizes: boolean;
   compareAtPrice: number | null;
   isFeatured: boolean;
   inStock: boolean;
@@ -44,7 +46,7 @@ export interface Variant {
   maxQty: number;
 }
 
-export interface ProductDetail extends Omit<ProductCardData, 'images' | 'priceFrom' | 'hasOptions'> {
+export interface ProductDetail extends Omit<ProductCardData, 'images' | 'priceFrom' | 'hasOptions' | 'hasColors' | 'hasSizes'> {
   variants: Variant[];
   description: string;
   brand: string;
@@ -87,6 +89,20 @@ export interface ShippingRate {
   wilayaName: string;
   price: number | null;
   isActive: boolean;
+}
+
+export type CartLineStatus = 'ok' | 'needs_option' | 'unavailable' | 'out_of_stock';
+export interface CartCheckLine {
+  productId: string;
+  variantId: string | null;
+  status: CartLineStatus;
+  slug: string;
+  name: string;
+  price: number;
+  maxQty: number;
+  label: string;
+  /** «الحجم» / «اللون» / «اللون والحجم» */
+  prompt: string;
 }
 
 export interface OrderResult {

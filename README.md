@@ -76,3 +76,7 @@ cd frontend && npm run typecheck && npm test
 ## الهوية البصرية
 اللوغو والأيقونات في `frontend/public/brand/` (نسخة داكنة للخلفيات الفاتحة، ونسخة فاتحة للوحة التحكم، وأيقونة التطبيق وصورة المشاركة `og.png`).
 الألوان من اللوغو: كحلي `#08224a` وذهبي `#c09840` (متغيرات `--cobalt-deep` و`--gold` في `frontend/src/app/globals.css`).
+
+## Google Search Console
+وسم التحقق موجود في `frontend/src/app/layout.tsx` (`verification.google`) ويظهر في `<head>` لكل الصفحات. خريطة الموقع على `/sitemap.xml` وملف `robots.txt` جاهزان،
+والصفحة الرئيسية تحمل بيانات منظّمة (Schema.org `Store`) وكل منتج يحمل `Product` مع السعر والتوفر.

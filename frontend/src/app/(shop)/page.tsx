@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getHome } from '@/lib/api';
+import { SITE_URL } from '@/lib/site';
 import { Img } from '@/components/Img';
 import { CategoryArt } from '@/components/CategoryArt';
 import { ProductGrid } from '@/components/ProductCard';
@@ -9,7 +10,7 @@ import type { Banner, CategoryNode, ProductCardData } from '@/lib/types';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { settings } = await getHome();
-  return { title: { absolute: `${settings.store_name} — ${settings.tagline}` }, description: settings.seo_description };
+  return { title: { absolute: `${settings.store_name} — ${settings.tagline}` }, description: settings.seo_description, alternates: { canonical: '/' } };
 }
 
 function Hero({ banners, tagline, name }: { banners: Banner[]; tagline: string; name: string }) {
@@ -93,8 +94,23 @@ function Section({ title, href, items }: { title: string; href: string; items: P
 export default async function HomePage() {
   const { settings, banners, categories, featured, newest, bestsellers, onSale } = await getHome();
   const empty = !featured.length && !newest.length;
+  // Tells Google this is a local shop (name, phone, town, Instagram) → better results and a richer search card.
+  const business = {
+    '@context': 'https://schema.org',
+    '@type': 'Store',
+    name: settings.store_name,
+    description: settings.seo_description,
+    url: SITE_URL,
+    logo: `${SITE_URL}/brand/icon-512.png`,
+    image: `${SITE_URL}/brand/og.png`,
+    telephone: settings.phone ? `+213${settings.phone.replace(/\D/g, '').replace(/^0/, '')}` : undefined,
+    address: { '@type': 'PostalAddress', addressLocality: 'وادي سوف', addressCountry: 'DZ' },
+    paymentAccepted: 'Cash on delivery',
+    sameAs: [settings.instagram, settings.facebook].filter(Boolean),
+  };
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(business).replace(/</g, '\\u003c') }} />
       <Hero banners={banners} tagline={settings.tagline} name={settings.store_name} />
       <TrustStrip whatsapp={!!settings.whatsapp} />
       <Categories items={categories} />

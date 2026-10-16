@@ -32,7 +32,7 @@ export function ProductCard({ p, priority = false }: { p: ProductCardData; prior
         </div>
         {p.hasOptions ? (
           <Link className={`btn btn-soft btn-sm btn-block card-add ${p.inStock ? '' : 'disabled'}`} aria-disabled={!p.inStock} href={`/product/${encodeURIComponent(p.slug)}`}>
-            {p.inStock ? 'اختر اللون / الحجم' : 'نفدت الكمية'}
+            {p.inStock ? `اختر ${p.hasColors && p.hasSizes ? 'اللون والحجم' : p.hasColors ? 'اللون' : 'الحجم'}` : 'نفدت الكمية'}
           </Link>
         ) : (
           <AddToCartButton compact product={{ id: p.id, slug: p.slug, name: p.name, price: p.price, image: first ?? null, maxQty: 20, inStock: p.inStock }} />

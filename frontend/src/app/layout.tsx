@@ -15,7 +15,8 @@ export const metadata: Metadata = {
   applicationName: 'Gamil Minage',
   openGraph: { type: 'website', locale: 'ar_DZ', siteName: 'Gamil Minage', images: [{ url: '/brand/og.png', width: 1200, height: 630, alt: 'Gamil Minage — Homeware & Kitchenware' }] },
   twitter: { card: 'summary_large_image', images: ['/brand/og.png'] },
-  verification: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION ? { google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION } : undefined,
+  // Google Search Console ownership tag (public by design — it is visible in the page source). An env var can override it.
+  verification: { google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || '_e5KojoNWDHjqna7mnfJXtbh-WilimBoQVOYM-NnCCs' },
   formatDetection: { telephone: false },
 };
 

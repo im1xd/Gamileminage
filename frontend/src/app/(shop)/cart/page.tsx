@@ -2,12 +2,15 @@
 
 import Link from 'next/link';
 import { cartKey, useCart } from '@/lib/cart';
+import { useCartSync } from '@/lib/cart-sync';
 import { formatNumber } from '@/lib/format';
 import { Img } from '@/components/Img';
 import { BoxIcon, TrashIcon } from '@/components/icons';
 
 export default function CartPage() {
   const cart = useCart();
+  const { needsOption } = useCartSync();
+  const blocked = Object.keys(needsOption).length > 0;
   return (
     <div className="container">
       <div className="page-title"><h1>سلة التسوق</h1></div>
@@ -28,6 +31,11 @@ export default function CartPage() {
                 <div>
                   <h3><Link href={`/product/${encodeURIComponent(item.slug)}`}>{item.name}</Link></h3>
                   {item.variantLabel && <p className="muted" style={{ fontSize: '.85rem', marginBlockEnd: '.4rem' }}>{item.variantLabel}</p>}
+                  {needsOption[cartKey(item)] && (
+                    <div className="notice warn" style={{ marginBlockEnd: '.5rem', fontSize: '.85rem' }}>
+                      هذا المنتج له خيارات — <Link href={`/product/${encodeURIComponent(needsOption[cartKey(item)].slug)}`} style={{ fontWeight: 700, textDecoration: 'underline' }}>اختر {needsOption[cartKey(item)].prompt}</Link> ثم احذف هذا السطر.
+                    </div>
+                  )}
                   <div className="qty" role="group" aria-label="الكمية" style={{ height: 38 }}>
                     <button type="button" aria-label="أنقص" onClick={() => cart.setQty(cartKey(item), item.quantity - 1)} disabled={item.quantity <= 1}>−</button>
                     <output>{item.quantity}</output>
@@ -43,7 +51,8 @@ export default function CartPage() {
             <h2>ملخص الطلب</h2>
             <div className="summary-row"><span>المجموع</span><b><span className="num">{formatNumber(cart.subtotal)}</span> دج</b></div>
             <div className="summary-row muted"><span>التوصيل</span><span>يُحسب حسب ولايتك</span></div>
-            <Link href="/checkout" className="btn btn-block" style={{ marginBlockStart: '1rem' }}>إتمام الطلب</Link>
+            <Link href="/checkout" className="btn btn-block" aria-disabled={blocked} style={{ marginBlockStart: '1rem' }} onClick={(e: { preventDefault(): void }) => { if (blocked) e.preventDefault(); }}>إتمام الطلب</Link>
+            {blocked && <p className="muted center" style={{ fontSize: '.82rem', marginBlockStart: '.6rem' }}>اختر خيارات المنتجات المُشار إليها أولاً.</p>}
             <p className="muted center" style={{ fontSize: '.85rem', marginBlockStart: '.8rem' }}>الدفع عند الاستلام</p>
           </aside>
         </div>

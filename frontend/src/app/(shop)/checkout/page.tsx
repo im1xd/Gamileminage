@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState, type FormEvent, type InputHTMLAttributes } from 'react';
 import { cartKey, useCart } from '@/lib/cart';
+import { useCartSync } from '@/lib/cart-sync';
 import { api, errorMessage, ApiClientError } from '@/lib/client-api';
 import { formatNumber } from '@/lib/format';
 import { toast } from '@/lib/toast';
@@ -19,6 +20,8 @@ const EMPTY: Form = { customerName: '', phone: '', wilayaCode: '', commune: '', 
 export default function CheckoutPage() {
   const cart = useCart();
   const router = useRouter();
+  const { needsOption } = useCartSync();
+  const blocked = Object.keys(needsOption).length > 0;
   const [rates, setRates] = useState<ShippingRate[] | null>(null);
   const [form, setForm] = useState<Form>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof Form, string>>>({});
@@ -47,6 +50,7 @@ export default function CheckoutPage() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setServerError('');
+    if (blocked) { setServerError('بعض المنتجات تحتاج اختيار خيار — ارجع إلى السلة.'); return; }
     if (!validate() || busy) return;
     setBusy(true);
     try {
@@ -120,6 +124,11 @@ export default function CheckoutPage() {
             {/* Honeypot — invisible to people, irresistible to bots. */}
             <div className="hp" aria-hidden="true"><label>الموقع<input tabIndex={-1} autoComplete="off" value={form.website} onChange={set('website')} /></label></div>
           </div>
+          {blocked && (
+            <div className="notice warn" style={{ marginBlockStart: '1rem' }} role="alert">
+              بعض المنتجات في سلتك لها خيارات تحتاج اختيارًا. <Link href="/cart" style={{ fontWeight: 700, textDecoration: 'underline' }}>ارجع إلى السلة</Link> لاختيار الخيار.
+            </div>
+          )}
           {serverError && <div className="notice bad" style={{ marginBlockStart: '1rem' }} role="alert">{serverError}</div>}
         </div>
 

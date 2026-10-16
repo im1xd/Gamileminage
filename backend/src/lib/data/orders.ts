@@ -35,6 +35,13 @@ interface Line {
   label: string;
 }
 
+/** «اللون» / «الحجم» / «اللون والحجم» — only the option types this product really has. */
+const promptFor = (options: { size: string; color: string }[]): string => {
+  const colors = options.some((o) => o.color !== '');
+  const sizes = options.some((o) => o.size !== '');
+  return colors && sizes ? 'اللون والحجم' : colors ? 'اللون' : 'الحجم';
+};
+
 const variantLabel = (v: { size: string; color: string }) =>
   [v.color && `اللون: ${v.color}`, v.size && `الحجم: ${v.size}`].filter(Boolean).join(' — ');
 
@@ -74,8 +81,10 @@ export async function createOrder(input: OrderCreateInput, ipHash: string) {
       const options = optionsOf(p.id);
       let v: LockedVariant | null = null;
       if (options.length > 0) {
-        if (!w.variantId) throw new ApiError(422, `اختر اللون أو الحجم للمنتج «${p.name}»`, 'variant_required');
-        v = options.find((o) => o.id === w.variantId) ?? null;
+        // A product with a single option has nothing to choose: use it. With several, the buyer must pick.
+        const wantedId = w.variantId ?? (options.length === 1 ? options[0].id : null);
+        if (!wantedId) throw new ApiError(422, `اختر ${promptFor(options)} للمنتج «${p.name}»`, 'variant_required');
+        v = options.find((o) => o.id === wantedId) ?? null;
         if (!v) throw new ApiError(409, `الخيار المختار من «${p.name}» لم يعد متوفرًا، حدّث السلة`, 'product_unavailable');
       } else if (w.variantId) {
         throw new ApiError(409, `«${p.name}» تغيّرت خياراته، حدّث السلة وحاول مجددًا`, 'product_unavailable');
@@ -285,4 +294,49 @@ export async function updateOrder(id: string, adminId: string, input: OrderUpdat
       await t.query(`INSERT INTO order_status_history (order_id, status, note, admin_id) VALUES ($1::uuid, $2::text, $3::text, $4::uuid)`, [id, nextStatus, input.note, adminId]);
     }
   });
+}
+
+export type CartLineStatus = 'ok' | 'needs_option' | 'unavailable' | 'out_of_stock';
+
+/**
+ * Re-validates what a customer's phone remembers (localStorage can be days old): a product may have gained
+ * colour/size options, changed price, or sold out since the line was added. Read-only; the order itself is
+ * re-validated again under lock in createOrder().
+ */
+export async function checkCart(items: { productId: string; variantId: string | null }[]) {
+  const productIds = [...new Set(items.map((i) => i.productId))];
+  const [products, variants] = await Promise.all([
+    query<{ id: string; slug: string; name: string; price: number; is_active: boolean; track_stock: boolean; stock: number }>(
+      `SELECT id, slug, name, price, is_active, track_stock, stock FROM products WHERE id = ANY($1::uuid[])`,
+      [productIds],
+    ),
+    query<{ id: string; product_id: string; size: string; color: string; price: number | null; stock: number }>(
+      `SELECT id, product_id, size, color, price, stock FROM product_variants WHERE product_id = ANY($1::uuid[]) AND is_active = true`,
+      [productIds],
+    ),
+  ]);
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const lines = items.map((item) => {
+    const p = byId.get(item.productId);
+    const base = { productId: item.productId, variantId: item.variantId };
+    if (!p || !p.is_active) return { ...base, status: 'unavailable' as CartLineStatus, slug: p?.slug ?? '', name: p?.name ?? '', price: 0, maxQty: 0, label: '', prompt: '' };
+    const options = variants.filter((v) => v.product_id === p.id);
+    let price = p.price;
+    let available = p.stock;
+    let label = '';
+    if (options.length > 0) {
+      const wantedId = item.variantId ?? (options.length === 1 ? options[0].id : null);
+      if (!wantedId) return { ...base, status: 'needs_option' as CartLineStatus, slug: p.slug, name: p.name, price: p.price, maxQty: 0, label: '', prompt: promptFor(options) };
+      const v = options.find((o) => o.id === wantedId);
+      if (!v) return { ...base, status: 'unavailable' as CartLineStatus, slug: p.slug, name: p.name, price: p.price, maxQty: 0, label: '', prompt: '' };
+      price = v.price ?? p.price;
+      available = v.stock;
+      label = variantLabel(v);
+    } else if (item.variantId) {
+      return { ...base, status: 'unavailable' as CartLineStatus, slug: p.slug, name: p.name, price: p.price, maxQty: 0, label: '', prompt: '' };
+    }
+    const soldOut = p.track_stock && available === 0;
+    return { ...base, status: (soldOut ? 'out_of_stock' : 'ok') as CartLineStatus, slug: p.slug, name: p.name, price, maxQty: p.track_stock ? Math.min(available, 20) : 20, label, prompt: '' };
+  });
+  return { lines };
 }

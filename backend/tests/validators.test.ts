@@ -140,3 +140,12 @@ test('order items: option id is optional but must be a uuid', () => {
   assert.equal(item('nope'), false);
   assert.equal(item("x'; DROP TABLE orders;--"), false);
 });
+
+test('cart check: bounded list of uuids', async () => {
+  const { cartCheckSchema } = await import('../src/lib/validators');
+  const line = { productId: UUID, variantId: null };
+  assert.ok(cartCheckSchema.safeParse({ items: [line] }).success);
+  assert.equal(cartCheckSchema.safeParse({ items: [] }).success, false);
+  assert.equal(cartCheckSchema.safeParse({ items: Array(31).fill(line) }).success, false);
+  assert.equal(cartCheckSchema.safeParse({ items: [{ productId: 'x', variantId: null }] }).success, false);
+});

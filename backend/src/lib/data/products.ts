@@ -15,7 +15,9 @@ const VX = `LEFT JOIN LATERAL (
            COALESCE(SUM(v.stock), 0)::int AS stock,
            MIN(COALESCE(v.price, p.price)) AS min_price,
            MAX(COALESCE(v.price, p.price)) AS max_price,
-           COALESCE(BOOL_OR(v.price IS NOT NULL), false) AS has_price
+           COALESCE(BOOL_OR(v.price IS NOT NULL), false) AS has_price,
+           COALESCE(BOOL_OR(v.color <> ''), false) AS has_colors,
+           COALESCE(BOOL_OR(v.size <> ''), false) AS has_sizes
     FROM product_variants v WHERE v.product_id = p.id AND v.is_active = true
   ) vx ON true`;
 
@@ -27,6 +29,8 @@ const CARD_COLUMNS = `
   p.id, p.name, p.slug, ${EFF_PRICE} AS price,
   COALESCE(vx.n > 0 AND vx.min_price <> vx.max_price, false) AS price_from,
   COALESCE(vx.n > 0, false) AS has_options,
+  COALESCE(vx.has_colors, false) AS has_colors,
+  COALESCE(vx.has_sizes, false) AS has_sizes,
   (CASE WHEN vx.has_price THEN NULL ELSE p.compare_at_price END) AS compare_at_price,
   p.is_featured,
   COALESCE(NOT p.track_stock OR ${EFF_STOCK} > 0, false)               AS in_stock,
